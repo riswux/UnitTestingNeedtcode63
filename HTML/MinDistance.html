@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minimum Distance Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        
+        button {
+            padding: 8px 16px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        #result {
+            margin-top: 10px;
+        }
+        
+        .message {
+            margin-top: 10px;
+        }
+        
+        .valid {
+            color: green;
+        }
+        
+        .invalid {
+            color: red;
+        }
+    </style>
+    <script>
+        class Solution {
+            minDistance(word1, word2) {
+                if (!this.isValidInput(word1) || !this.isValidInput(word2))
+                    throw new Error("Invalid input: words should consist of lowercase English letters only.");
+        
+                const dp = Array(word1.length + 1).fill(null).map(() => Array(word2.length + 1).fill(-1));
+        
+                function dfs(i, j) {
+                    if (dp[i][j] !== -1) return dp[i][j];
+        
+                    if (i === word1.length && j === word2.length) return 0;
+                    if (i === word1.length) return 1 + dfs(i, j + 1);
+                    if (j === word2.length) return 1 + dfs(i + 1, j);
+        
+                    if (word1[i] === word2[j]) return dfs(i + 1, j + 1);
+        
+                    const insert1Delete2 = 1 + dfs(i, j + 1);
+                    const insert2Delete1 = 1 + dfs(i + 1, j);
+                    const replace1Or2 = 1 + dfs(i + 1, j + 1);
+        
+                    const res = Math.min(insert1Delete2, insert2Delete1, replace1Or2);
+                    dp[i][j] = res;
+                    return res;
+                }
+        
+                return dfs(0, 0);
+            }
+        
+            isValidInput(word) {
+                const pattern = /^[a-z]+$/;
+                return word.trim() !== "" && word.length <= 500 && pattern.test(word);
+            }
+        }
+        
+        function checkMinimumDistance() {
+            const word1 = document.getElementById("word1").value;
+            const word2 = document.getElementById("word2").value;
+            const resultElement = document.getElementById("result");
+            const messageElement = document.getElementById("message");
+            
+            messageElement.textContent = "";
+            resultElement.textContent = "";
+            
+            const solution = new Solution();
+            try {
+                if (!solution.isValidInput(word1) || !solution.isValidInput(word2)) {
+                    messageElement.textContent = "Invalid input: words should consist of lowercase English letters only.";
+                    messageElement.style.color='red';
+                    messageElement.classList.add("invalid");
+                    
+                    return;
+                }
+                
+                const minDistance = solution.minDistance(word1, word2);
+                messageElement.textContent = "Valid input. Minimum distance:";
+                messageElement.style.color='green';
+                messageElement.classList.add("valid");
+                resultElement.textContent = minDistance;
+            } catch (error) {
+                messageElement.textContent = error.message;
+                messageElement.style.color='red';
+                messageElement.classList.add("invalid");
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Minimum Distance Checker</h2>
+        <label for="word1">Word 1:</label>
+        <input type="text" id="word1" placeholder="Enter a word">
+        <label for="word2">Word 2:</label>
+        <input type="text" id="word2" placeholder="Enter another word">
+        <button onclick="checkMinimumDistance()">Calculate Minimum Distance</button>
+        <div id="result"></div>
+        <div id="message" class="message"></div>
+    </div>
+</body>
+</html>
